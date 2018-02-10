@@ -1,0 +1,6 @@
+.DS_Store
+/vendor
+/database.yml
+/.bundle/
+/vendor/bundle
+sinatra.log
