@@ -10,6 +10,10 @@ class Bookshelf < Sinatra::Application
   set :show_exceptions, false
   helpers Sinatra::Param
 
+  UNREAD   = "unread"
+  READING  = "reading"
+  FINISHED = "finished"
+
   before do
     @client = Mysql2::Client.new(YAML.load_file('database.yml'))  
     content_type :json
@@ -47,6 +51,30 @@ class Bookshelf < Sinatra::Application
     param :image , String , required: false
     param :status, String , required: true
     update_book
+    status 204
+    # status 404
+    # status 409
+  end
+
+  put '/api/book/unread' do
+    param :id    , Integer, required: true
+    update_unread
+    status 204
+    # status 404
+    # status 409
+  end
+
+  put '/api/book/reading' do
+    param :id    , Integer, required: true
+    update_reading
+    status 204
+    # status 404
+    # status 409
+  end
+
+  put '/api/book/finished' do
+    param :id    , Integer, required: true
+    update_finished
     status 204
     # status 404
     # status 409
@@ -100,6 +128,32 @@ class Bookshelf < Sinatra::Application
     return 
   end
 
+  def update_unread
+    sql = "UPDATE books 
+              SET status = ? 
+            WHERE id = ?"
+    ary = Array.new
+    @client.xquery(sql, UNREAD, params[:id])
+    return 
+  end
+
+  def update_reading
+    sql = "UPDATE books 
+              SET status = ? 
+            WHERE id = ?"
+    ary = Array.new
+    @client.xquery(sql, READING, params[:id])
+    return 
+  end
+
+  def update_finished
+    sql = "UPDATE books 
+              SET status = ? 
+            WHERE id = ?"
+    ary = Array.new
+    @client.xquery(sql, FINISHED, params[:id])
+    return 
+  end
 
   def delete_book
     sql = "DELETE 
@@ -111,29 +165,29 @@ class Bookshelf < Sinatra::Application
   end
 
   def get_unread_count
-    sql = 'SELECT COUNT(*) as count 
+    sql = "SELECT COUNT(*) as count 
              FROM books 
-            WHERE status = "unread"'
+            WHERE status = ?"
     ary = Array.new
-    @client.xquery(sql).each {|row| ary << row}
+    @client.xquery(sql, UNREAD).each {|row| ary << row}
     return ary.to_json
   end
 
   def get_reading_count
-    sql = 'SELECT COUNT(*) as count 
+    sql = "SELECT COUNT(*) as count 
              FROM books 
-            WHERE status = "reading"'
+            WHERE status = ?"
     ary = Array.new
-    @client.xquery(sql).each {|row| ary << row}
+    @client.xquery(sql, READING).each {|row| ary << row}
     return ary.to_json
   end
 
   def get_finished_count
-    sql = 'SELECT COUNT(*) as count 
+    sql = "SELECT COUNT(*) as count 
              FROM books 
-            WHERE status = "finished"'
+            WHERE status = ?"
     ary = Array.new
-    @client.xquery(sql).each {|row| ary << row}
+    @client.xquery(sql, FINISHED).each {|row| ary << row}
     return ary.to_json
   end
 end
