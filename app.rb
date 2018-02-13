@@ -16,6 +16,7 @@ class Bookshelf < Sinatra::Application
 
   before do
     @client = Mysql2::Client.new(YAML.load_file('database.yml'))  
+    @ary = Array.new
     content_type :json
   end
 
@@ -108,7 +109,6 @@ class Bookshelf < Sinatra::Application
   end
 
   error do
-    status 500
     '500 server error'
   end
 
@@ -117,9 +117,8 @@ class Bookshelf < Sinatra::Application
              FROM books 
          ORDER BY created_at DESC 
             LIMIT 10"
-    ary = Array.new
-    @client.xquery(sql).each {|row| ary << row}
-    return ary.to_json
+    @client.xquery(sql).each {|row| @ary << row}
+    return @ary.to_json
   end
 
   def post_book
@@ -127,7 +126,6 @@ class Bookshelf < Sinatra::Application
              (title, image, status)
            VALUES 
              (?, ?, ?)"
-    ary = Array.new
     @client.xquery(sql, params[:title], params[:image], params[:status])
     return 
   end
@@ -138,7 +136,6 @@ class Bookshelf < Sinatra::Application
                 , image = ?
                 , status = ? 
             WHERE id = ?"
-    ary = Array.new
     @client.xquery(sql, params[:title], params[:image], params[:status], params[:id])
     return 
   end
@@ -147,7 +144,6 @@ class Bookshelf < Sinatra::Application
     sql = "UPDATE books 
               SET status = ? 
             WHERE id = ?"
-    ary = Array.new
     @client.xquery(sql, UNREAD, params[:id])
     return 
   end
@@ -156,7 +152,6 @@ class Bookshelf < Sinatra::Application
     sql = "UPDATE books 
               SET status = ? 
             WHERE id = ?"
-    ary = Array.new
     @client.xquery(sql, READING, params[:id])
     return 
   end
@@ -165,7 +160,6 @@ class Bookshelf < Sinatra::Application
     sql = "UPDATE books 
               SET status = ? 
             WHERE id = ?"
-    ary = Array.new
     @client.xquery(sql, FINISHED, params[:id])
     return 
   end
@@ -174,7 +168,6 @@ class Bookshelf < Sinatra::Application
     sql = "DELETE 
              FROM books 
             WHERE id = ?"
-    ary = Array.new
     @client.xquery(sql, params[:id])
     return 
   end
@@ -183,35 +176,31 @@ class Bookshelf < Sinatra::Application
     sql = "SELECT COUNT(*) as count 
              FROM books 
             WHERE status = ?"
-    ary = Array.new
-    @client.xquery(sql, UNREAD).each {|row| ary << row}
-    return ary.to_json
+    @client.xquery(sql, UNREAD).each {|row| @ary << row}
+    return @ary.to_json
   end
 
   def get_reading_count
     sql = "SELECT COUNT(*) as count 
              FROM books 
             WHERE status = ?"
-    ary = Array.new
-    @client.xquery(sql, READING).each {|row| ary << row}
-    return ary.to_json
+    @client.xquery(sql, READING).each {|row| @ary << row}
+    return @ary.to_json
   end
 
   def get_finished_count
     sql = "SELECT COUNT(*) as count 
              FROM books 
             WHERE status = ?"
-    ary = Array.new
-    @client.xquery(sql, FINISHED).each {|row| ary << row}
-    return ary.to_json
+    @client.xquery(sql, FINISHED).each {|row| @ary << row}
+    return @ary.to_json
   end
 
   def get_book
     sql = "SELECT * 
              FROM books 
             WHERE id = ?"
-    ary = Array.new
-    @client.xquery(sql, params[:id]).each {|row| ary << row}
-    return ary
+    @client.xquery(sql, params[:id]).each {|row| @ary << row}
+    return @ary
   end
 end
