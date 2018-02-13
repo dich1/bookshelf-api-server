@@ -50,41 +50,56 @@ class Bookshelf < Sinatra::Application
     param :title , String , required: true
     param :image , String , required: false
     param :status, String , required: true
-    update_book
-    status 204
-    # status 404
+    if get_book.count.zero?
+      status 404
+    else
+      update_book
+      status 204
+    end
     # status 409
   end
 
   put '/api/book/unread' do
     param :id    , Integer, required: true
-    update_unread
-    status 204
-    # status 404
+    if get_book.count.zero?
+      status 404
+    else
+      update_unread
+      status 204
+    end
     # status 409
   end
 
   put '/api/book/reading' do
     param :id    , Integer, required: true
-    update_reading
-    status 204
-    # status 404
+    if get_book.count.zero?
+      status 404
+    else
+      update_reading
+      status 204
+    end
     # status 409
   end
 
   put '/api/book/finished' do
     param :id    , Integer, required: true
-    update_finished
-    status 204
-    # status 404
+    if get_book.count.zero?
+      status 404
+    else
+      update_finished
+      status 204
+    end
     # status 409
   end
 
   delete '/api/book/' do
     param :id    , Integer, required: true
-    delete_book
-    status 204
-    # status 404
+    if get_book.count.zero?
+      status 404
+    else
+      delete_book
+      status 204
+    end
     # status 409
   end
 
@@ -189,5 +204,14 @@ class Bookshelf < Sinatra::Application
     ary = Array.new
     @client.xquery(sql, FINISHED).each {|row| ary << row}
     return ary.to_json
+  end
+
+  def get_book
+    sql = "SELECT * 
+             FROM books 
+            WHERE id = ?"
+    ary = Array.new
+    @client.xquery(sql, params[:id]).each {|row| ary << row}
+    return ary
   end
 end
