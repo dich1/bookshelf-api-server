@@ -17,6 +17,7 @@ class Bookshelf < Sinatra::Application
   before do
     @client = Mysql2::Client.new(YAML.load_file('database.yml'))  
     @ary = Array.new
+    @hash = Hash.new { |h, k| h[k] = [] }
     content_type :json
   end
 
@@ -118,7 +119,8 @@ class Bookshelf < Sinatra::Application
          ORDER BY created_at DESC 
             LIMIT 10"
     @client.xquery(sql).each {|row| @ary << row}
-    return @ary.to_json
+    @hash["books"] = @ary
+    return @hash.to_json
   end
 
   def post_book
