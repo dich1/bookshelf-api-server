@@ -25,16 +25,16 @@ class Bookshelf < Sinatra::Application
     get_books
   end
 
-  get '/api/books/unread/' do
-    get_unread_count
+  get '/api/books/count/unread/' do
+    get_count_unread
   end 
 
-  get '/api/books/reading/' do
-    get_reading_count
+  get '/api/books/count/reading/' do
+    get_count_reading
   end 
 
-  get '/api/books/finished/' do
-    get_finished_count
+  get '/api/books/count/finished/' do
+    get_count_finished
   end
 
   post '/api/book/' do
@@ -174,7 +174,7 @@ class Bookshelf < Sinatra::Application
     return 
   end
 
-  def get_unread_count
+  def get_count_unread
     sql = "SELECT COUNT(*) as count 
              FROM books 
             WHERE status = ?"
@@ -182,7 +182,7 @@ class Bookshelf < Sinatra::Application
     return @hash.to_json
   end
 
-  def get_reading_count
+  def get_count_reading
     sql = "SELECT COUNT(*) as count 
              FROM books 
             WHERE status = ?"
@@ -190,7 +190,7 @@ class Bookshelf < Sinatra::Application
     return @hash.to_json
   end
 
-  def get_finished_count
+  def get_count_finished
     sql = "SELECT COUNT(*) as count 
              FROM books 
             WHERE status = ?"
