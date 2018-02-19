@@ -178,31 +178,31 @@ class Bookshelf < Sinatra::Application
     sql = "SELECT COUNT(*) as count 
              FROM books 
             WHERE status = ?"
-    @client.xquery(sql, UNREAD).each {|row| @ary << row}
-    return @ary.to_json
+    @hash = @client.xquery(sql, UNREAD).first
+    return @hash.to_json
   end
 
   def get_reading_count
     sql = "SELECT COUNT(*) as count 
              FROM books 
             WHERE status = ?"
-    @client.xquery(sql, READING).each {|row| @ary << row}
-    return @ary.to_json
+    @hash = @client.xquery(sql, READING).first
+    return @hash.to_json
   end
 
   def get_finished_count
     sql = "SELECT COUNT(*) as count 
              FROM books 
             WHERE status = ?"
-    @client.xquery(sql, FINISHED).each {|row| @ary << row}
-    return @ary.to_json
+    @hash = @client.xquery(sql, FINISHED).first
+    return @hash.to_json
   end
 
   def get_book
     sql = "SELECT * 
              FROM books 
             WHERE id = ?"
-    @client.xquery(sql, params[:id]).each {|row| @ary << row}
-    return @ary
+    @hash = @client.xquery(sql, params[:id]).first
+    return @hash
   end
 end
