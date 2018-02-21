@@ -1,6 +1,7 @@
 require 'sinatra/base'
 require 'sinatra/reloader'
 require 'sinatra/param'
+require 'sinatra/cross_origin'
 require 'mysql2-cs-bind'
 require 'json'
 require 'yaml'
@@ -14,7 +15,14 @@ class Bookshelf < Sinatra::Application
   READING  = "reading"
   FINISHED = "finished"
 
+  configure do
+    enable :cross_origin
+    register Sinatra::CrossOrigin
+    set :allow_methods, [:get, :post, :put, :delete]
+  end
+
   before do
+    cross_origin
     @client = Mysql2::Client.new(YAML.load_file('database.yml'))  
     @ary = Array.new
     @hash = Hash.new { |h, k| h[k] = [] }
