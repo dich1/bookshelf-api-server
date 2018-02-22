@@ -18,7 +18,7 @@ class Bookshelf < Sinatra::Application
   configure do
     enable :cross_origin
     register Sinatra::CrossOrigin
-    set :allow_methods, [:get, :post, :put, :delete]
+    set :allow_methods, [:get, :post, :options, :put, :delete]
   end
 
   before do
@@ -27,6 +27,12 @@ class Bookshelf < Sinatra::Application
     @ary = Array.new
     @hash = Hash.new { |h, k| h[k] = [] }
     content_type :json
+  end
+
+  options "*" do
+    response.headers["Access-Control-Allow-Methods"] = "HEAD,GET,PUT,POST,DELETE,OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept"
+    "ok"
   end
 
   get '/api/books/' do
@@ -50,7 +56,7 @@ class Bookshelf < Sinatra::Application
     param :title , String , required: true
     param :image , String , required: false
     param :status, String , required: true
-    post_book
+    register_book
     status 201
     # status 409
   end
@@ -131,7 +137,7 @@ class Bookshelf < Sinatra::Application
     return @hash.to_json
   end
 
-  def post_book
+  def register_book
     sql = "INSERT INTO books
              (title, image, status)
            VALUES 
