@@ -75,7 +75,7 @@ class Bookshelf < Sinatra::Application
     # status 409
   end
 
-  put '/api/book/unread' do
+  put '/api/book/unread/' do
     param :id    , Integer, required: true
     if get_book.count.zero?
       status 404
@@ -86,7 +86,7 @@ class Bookshelf < Sinatra::Application
     # status 409
   end
 
-  put '/api/book/reading' do
+  put '/api/book/reading/' do
     param :id    , Integer, required: true
     if get_book.count.zero?
       status 404
@@ -97,7 +97,7 @@ class Bookshelf < Sinatra::Application
     # status 409
   end
 
-  put '/api/book/finished' do
+  put '/api/book/finished/' do
     param :id    , Integer, required: true
     if get_book.count.zero?
       status 404
