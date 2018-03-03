@@ -5,6 +5,18 @@ require 'sinatra/cross_origin'
 require 'mysql2-cs-bind'
 require 'json'
 require 'yaml'
+require 'carrierwave'
+require 'fileutils'
+
+class ImageUploader < CarrierWave::Uploader::Base
+  permissions 0666
+  directory_permissions 0777
+  storage :file
+
+  def extension_whitelist
+    %w(jpg jpeg gif png)
+  end
+end
 
 class Bookshelf < Sinatra::Application
   enable :method_override
@@ -15,6 +27,8 @@ class Bookshelf < Sinatra::Application
   READING  = "reading"
   FINISHED = "finished"
 
+  UPLOARD_DIRECTORY = '/Users/daichi/PJ/bookshelf-api-server/uploads/'
+
   configure do
     enable :cross_origin
     register Sinatra::CrossOrigin
@@ -23,7 +37,8 @@ class Bookshelf < Sinatra::Application
 
   before do
     cross_origin
-    @client = Mysql2::Client.new(YAML.load_file('database.yml'))  
+    @client = Mysql2::Client.new(YAML.load_file('database.yml'))
+    # @client = Mysql2::Client.new(YAML.load_file('database.yml'))['development']
     @ary = Array.new
     @hash = Hash.new { |h, k| h[k] = [] }
     content_type :json
@@ -54,7 +69,7 @@ class Bookshelf < Sinatra::Application
   post '/api/book/' do
     # パラメータ不正：status 400
     param :title , String , required: true
-    param :image , String , required: false
+    param :image , Hash   , required: false
     param :status, String , required: true
     register_book
     status 201
@@ -138,11 +153,14 @@ class Bookshelf < Sinatra::Application
   end
 
   def register_book
+    uploader = ImageUploader.new
+    uploader.store!(params[:image])
+
     sql = "INSERT INTO books
              (title, image, status)
            VALUES 
              (?, ?, ?)"
-    @client.xquery(sql, params[:title], params[:image], params[:status])
+    @client.xquery(sql, params[:title], params[:image][:filename], params[:status])
     return 
   end
 
@@ -181,6 +199,13 @@ class Bookshelf < Sinatra::Application
   end
 
   def delete_book
+    uploader = ImageUploader.new
+    target_book = get_book
+    target_file = UPLOARD_DIRECTORY.concat(target_book['image'])
+    if File.file?(target_file)
+      FileUtils.rm(target_file)
+    end
+    
     sql = "DELETE 
              FROM books 
             WHERE id = ?"
