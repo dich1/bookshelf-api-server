@@ -23,9 +23,9 @@ class Bookshelf < Sinatra::Application
   set :show_exceptions, false
   helpers Sinatra::Param
 
-  UNREAD   = "unread"
-  READING  = "reading"
-  FINISHED = "finished"
+  UNREAD   = "0"
+  READING  = "1"
+  FINISHED = "2"
 
   UPLOARD_DIRECTORY = '/Users/daichi/PJ/bookshelf-api-server/uploads/'
 
@@ -201,7 +201,10 @@ class Bookshelf < Sinatra::Application
   def delete_book
     uploader = ImageUploader.new
     target_book = get_book
-    target_file = UPLOARD_DIRECTORY.concat(target_book['image'])
+    target_file = ''
+    if !target_book['image'].nil?
+      target_file = UPLOARD_DIRECTORY.concat(target_book['image'])
+    end
     if File.file?(target_file)
       FileUtils.rm(target_file)
     end
